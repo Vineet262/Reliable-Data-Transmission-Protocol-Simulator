@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}About Project | Reliable Data Transmission Protocol Simulator{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-cyan-subtle text-cyan mb-2 small fw-semibold border border-cyan">
+            <i class="bi bi-info-circle"></i> Project Documentation &amp; PBL Architecture
+        </div>
+        <h1 class="h3 fw-bold text-white mb-1">About the ARQ Simulator Project</h1>
+        <p class="text-slate-400 small mb-0">
+            A comprehensive Computer Networks Project-Based Learning (PBL) platform for studying transport and data-link reliability protocols.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Architecture & Methodology -->
+        <div class="col-lg-8">
+            <div class="card card-navy p-4 mb-4">
+                <h2 class="h5 fw-bold text-white mb-3">
+                    <i class="bi bi-diagram-3 text-cyan me-2"></i>System Architecture &amp; Discrete-Event Simulation
+                </h2>
+                <p class="small text-slate-300 leading-relaxed">
+                    This simulator uses a <strong>deterministic discrete-event simulation engine</strong> rather than relying on real-time sleep calls. Real operating system sleep calls introduce non-deterministic execution times, OS scheduling jitter, and high latency during testing. In contrast, our engine manages a simulated clock with millisecond precision, advancing instantaneously from event to event via a priority queue (<code class="text-cyan">heapq</code>).
+                </p>
+
+                <!-- Architecture Visual -->
+                <div class="p-3 rounded bg-dark border border-dark-subtle mb-3 font-mono x-small">
+                    <div class="text-cyan mb-2">// Discrete Event Scheduler Flow:</div>
+                    <div class="text-slate-300">
+                        [User Configuration (Loss, Delay, Window, Seed)]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+                        [Engine Dispatcher: engine.py]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+                        [Priority Queue (Min-Heap of SimEvent objects by timestamp)]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&darr;&nbsp;Event Loop (Process &amp; Schedule Future Events)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- PACKET_SENT &rarr; Network Channel (Loss Check &amp; Delay)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- PACKET_RECEIVED &rarr; Receiver Logic (Deliver / Buffer / Discard)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- ACK_SENT &rarr; Network Channel (Loss Check &amp; Delay)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- ACK_RECEIVED &rarr; Sender Window Advance &amp; Timer Reset<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;+-- TIMEOUT &rarr; Sender Retransmission (Single / GBN / SR)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+                        [Metrics Calculator: Throughput, Efficiency, Delivery Ratio]<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&darr;<br>
+                        [Structured JSON Response &rarr; Frontend Timeline Visualizer]
+                    </div>
+                </div>
+
+                <h3 class="h6 fw-bold text-white mb-2">Key Engineering Design Decisions:</h3>
+                <ul class="text-slate-300 small leading-relaxed mb-0">
+                    <li class="mb-2">
+                        <strong>Deterministic Reproducibility:</strong> Providing a random seed guarantees identical packet and ACK drop sequences across comparative runs.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Stale Event Elimination:</strong> Timeouts are tracked with monotonic cookie identifiers, ensuring obsolete timer events do not cause improper retransmissions after window advancement.
+                    </li>
+                    <li class="mb-2">
+                        <strong>Decoupled Playback:</strong> The frontend animation speed (0.5x–4x) is completely separate from simulated network propagation delay. Changing visual speed does not alter computed throughput or efficiency metrics.
+                    </li>
+                    <li>
+                        <strong>Robust Metric Formulations:</strong> Zero-division guards and strict definitions prevent false 100% metrics on incomplete transfers.
+                    </li>
+                </ul>
+            </div>
+
+            <!-- PBL Deliverables Summary -->
+            <div class="card card-navy p-4">
+                <h2 class="h5 fw-bold text-white mb-3">
+                    <i class="bi bi-file-earmark-text text-cyan me-2"></i>Academic Deliverables &amp; Documentation
+                </h2>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle h-100">
+                            <h3 class="h6 fw-bold text-white mb-1"><i class="bi bi-file-text text-primary me-1"></i> Project Report</h3>
+                            <p class="x-small text-slate-400 mb-2">Detailed PBL academic report formatted with problem definition, algorithms, and results template.</p>
+                            <span class="badge bg-secondary-subtle text-slate-300 x-small font-mono">docs/PROJECT_REPORT.md</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle h-100">
+                            <h3 class="h6 fw-bold text-white mb-1"><i class="bi bi-chat-left-quote text-warning me-1"></i> Viva Questions</h3>
+                            <p class="x-small text-slate-400 mb-2">20+ comprehensive viva questions with concise answers for academic defense.</p>
+                            <span class="badge bg-secondary-subtle text-slate-300 x-small font-mono">docs/VIVA_QUESTIONS.md</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle h-100">
+                            <h3 class="h6 fw-bold text-white mb-1"><i class="bi bi-display text-success me-1"></i> Faculty Demo Guide</h3>
+                            <p class="x-small text-slate-400 mb-2">Step-by-step demonstration manual showcasing loss, timeouts, and comparisons.</p>
+                            <span class="badge bg-secondary-subtle text-slate-300 x-small font-mono">docs/DEMO_GUIDE.md</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Specifications -->
+        <div class="col-lg-4">
+            <div class="card card-navy p-4 mb-4">
+                <h2 class="h6 fw-bold text-white mb-3">
+                    <i class="bi bi-cpu text-cyan me-1"></i> Technology Stack
+                </h2>
+                <ul class="list-unstyled small text-slate-300 mb-0">
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Backend Framework</span>
+                        <strong class="text-white">Flask 3.1.0</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Language</span>
+                        <strong class="text-white">Python 3.13+</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Simulation Paradigm</span>
+                        <strong class="text-cyan">Discrete-Event Heap</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Testing Suite</span>
+                        <strong class="text-white">pytest 8.3+</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Frontend UI</span>
+                        <strong class="text-white">HTML5, CSS3, JS (ES6+)</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1 border-bottom border-dark-subtle">
+                        <span>Responsive Grid</span>
+                        <strong class="text-white">Bootstrap 5.3</strong>
+                    </li>
+                    <li class="d-flex justify-content-between py-1">
+                        <span>Comparative Charts</span>
+                        <strong class="text-white">Chart.js 4.4</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="card card-navy p-4">
+                <h2 class="h6 fw-bold text-white mb-3">
+                    <i class="bi bi-terminal text-cyan me-1"></i> Quick Start Commands
+                </h2>
+                <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-300 mb-3">
+                    # Activate environment<br>
+                    .venv\Scripts\activate<br><br>
+                    # Run test suite<br>
+                    pytest -v<br><br>
+                    # Start server<br>
+                    python app.py
+                </div>
+                <p class="x-small text-slate-400 mb-0">
+                    Default server URL: <a href="http://127.0.0.1:5000" target="_blank" class="text-cyan text-decoration-none">http://127.0.0.1:5000</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

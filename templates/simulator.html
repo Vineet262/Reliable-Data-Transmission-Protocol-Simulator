@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Protocol Simulator | Reliable Data Transmission{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-white mb-1">Interactive Protocol Simulator</h1>
+            <p class="text-slate-400 small mb-0">
+                Discrete-event execution of Stop-and-Wait, Go-Back-N, and Selective Repeat ARQ protocols.
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('comparison_page') }}" class="btn btn-outline-cyan btn-sm">
+                <i class="bi bi-bar-chart-fill me-1"></i> Open Comparison View
+            </a>
+            <a href="{{ url_for('learning_page') }}" class="btn btn-secondary btn-sm bg-navy-card border-secondary">
+                <i class="bi bi-question-circle me-1"></i> ARQ Guide
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="simAlertContainer" class="mb-3"></div>
+
+    <div class="row g-4">
+        <!-- Configuration Panel (Left Column) -->
+        <div class="col-lg-4 col-xl-3">
+            <div class="card card-navy p-3 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h6 fw-bold text-white mb-0">
+                        <i class="bi bi-sliders text-cyan me-1"></i> Simulation Parameters
+                    </h2>
+                    <span class="badge bg-cyan-subtle text-cyan x-small">Config</span>
+                </div>
+
+                <form id="simConfigForm">
+                    <!-- Protocol Selector -->
+                    <div class="mb-3">
+                        <label for="configProtocol" class="form-label x-small text-slate-300 fw-semibold mb-1">
+                            ARQ Protocol
+                            <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Select between Stop-and-Wait, Go-Back-N, or Selective Repeat ARQ."></i>
+                        </label>
+                        <select class="form-select form-select-sm form-select-navy" id="configProtocol">
+                            <option value="stop_and_wait" {% if request.args.get('proto') == 'stop_and_wait' %}selected{% endif %}>Stop-and-Wait ARQ</option>
+                            <option value="go_back_n" {% if request.args.get('proto') == 'go_back_n' %}selected{% endif %}>Go-Back-N ARQ</option>
+                            <option value="selective_repeat" {% if request.args.get('proto') == 'selective_repeat' or not request.args.get('proto') %}selected{% endif %}>Selective Repeat ARQ</option>
+                        </select>
+                    </div>
+
+                    <!-- Total Packets -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configTotalPackets" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                Total Packets (1–100)
+                            </label>
+                            <span class="x-small text-slate-400 font-mono" id="valTotalPackets">20</span>
+                        </div>
+                        <input type="number" class="form-control form-control-sm form-control-navy" id="configTotalPackets" min="1" max="100" value="20" required>
+                    </div>
+
+                    <!-- Sliding Window Size -->
+                    <div class="mb-3" id="windowSizeGroup">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configWindowSize" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                Sliding Window Size (W)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Maximum outstanding frames allowed in flight. Fixed at 1 for Stop-and-Wait."></i>
+                            </label>
+                        </div>
+                        <input type="number" class="form-control form-control-sm form-control-navy" id="configWindowSize" min="1" max="20" value="4">
+                    </div>
+
+                    <!-- Packet Loss Probability -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configPacketLoss" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                Data Packet Loss (%)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Probability that a forward data packet is dropped by the network (0% to 50%)."></i>
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-navy" id="configPacketLoss" min="0" max="50" step="1" value="10" required>
+                            <span class="input-group-text bg-dark border-secondary text-slate-400">%</span>
+                        </div>
+                    </div>
+
+                    <!-- ACK Loss Probability -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configAckLoss" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                ACK Loss (%)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Probability that a reverse acknowledgement is dropped by the network (0% to 50%)."></i>
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-navy" id="configAckLoss" min="0" max="50" step="1" value="5" required>
+                            <span class="input-group-text bg-dark border-secondary text-slate-400">%</span>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Network Delay -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configDelay" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                One-Way Delay (ms)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Simulated one-way propagation delay in milliseconds. Does not affect animation playback speed."></i>
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-navy" id="configDelay" min="10" max="2000" step="10" value="200" required>
+                            <span class="input-group-text bg-dark border-secondary text-slate-400">ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Timeout Duration -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configTimeout" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                Timeout Duration (ms)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Duration before sender triggers retransmission. Must be greater than RTT (2x delay) for stability."></i>
+                            </label>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="number" class="form-control form-control-navy" id="configTimeout" min="50" max="5000" step="10" value="600" required>
+                            <span class="input-group-text bg-dark border-secondary text-slate-400">ms</span>
+                        </div>
+                    </div>
+
+                    <!-- Random Seed -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="configSeed" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                                Random Seed (Optional)
+                                <i class="bi bi-info-circle info-icon ms-1" data-bs-toggle="tooltip" title="Optional integer seed to produce 100% reproducible drop sequences across runs."></i>
+                            </label>
+                        </div>
+                        <input type="number" class="form-control form-control-sm form-control-navy" id="configSeed" placeholder="e.g. 42">
+                    </div>
+
+                    <div class="alert alert-secondary py-2 px-3 small border-0 bg-dark mb-3">
+                        <i class="bi bi-info-circle-fill text-cyan me-1"></i>
+                        <span class="x-small text-slate-400">Default settings are demonstration values (not measured live internet conditions).</span>
+                    </div>
+
+                    <!-- Simulation Control Buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-cyan btn-sm fw-semibold" id="btnRunSim">
+                            <i class="bi bi-play-fill me-1"></i> Run Simulation
+                        </button>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-outline-secondary" id="btnPause" disabled>
+                                <i class="bi bi-pause-fill"></i> Pause
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="btnResume" disabled>
+                                <i class="bi bi-play-fill"></i> Resume
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="btnStep" disabled>
+                                <i class="bi bi-skip-end-fill"></i> Step
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" id="btnReset" disabled>
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="border-secondary my-3">
+
+                <!-- Animation Playback Speed Slider (Independent of network delay!) -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label for="animSpeed" class="form-label x-small text-slate-300 fw-semibold mb-0">
+                            Animation Speed
+                        </label>
+                        <span class="x-small text-cyan font-mono" id="speedLabel">1x</span>
+                    </div>
+                    <input type="range" class="form-range" id="animSpeed" min="0.5" max="4" step="0.5" value="1">
+                    <div class="d-flex justify-content-between x-small text-slate-500 font-mono">
+                        <span>0.5x</span>
+                        <span>1x</span>
+                        <span>2x</span>
+                        <span>4x</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Visualization Stage & Metrics (Right Column) -->
+        <div class="col-lg-8 col-xl-9">
+            <!-- Progress Bar -->
+            <div class="progress bg-dark mb-3" style="height: 6px;">
+                <div id="simProgressBar" class="progress-bar bg-cyan" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+
+            <!-- Visualization Stage -->
+            <div class="animation-stage mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1">Sender &rarr; Receiver Channel</span>
+                        <span id="metricStatus" class="badge bg-secondary">Idle</span>
+                    </div>
+                    <!-- Color legend -->
+                    <div class="d-flex flex-wrap gap-2 x-small">
+                        <span class="badge badge-transit"><i class="bi bi-circle-fill me-1"></i>In Transit</span>
+                        <span class="badge badge-delivered"><i class="bi bi-circle-fill me-1"></i>Delivered/ACK</span>
+                        <span class="badge badge-dropped"><i class="bi bi-circle-fill me-1"></i>Dropped</span>
+                        <span class="badge badge-timeout"><i class="bi bi-circle-fill me-1"></i>Timeout/Retx</span>
+                        <span class="badge badge-ack"><i class="bi bi-circle-fill me-1"></i>ACK</span>
+                    </div>
+                </div>
+
+                <!-- Three nodes: Sender | Channel | Receiver -->
+                <div class="row g-2 align-items-center mb-3">
+                    <!-- Sender Node -->
+                    <div class="col-3">
+                        <div class="node-box" id="senderNodeBox">
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-dark-subtle pb-1 mb-2">
+                                <span class="fw-bold text-white small"><i class="bi bi-laptop text-primary me-1"></i> Sender</span>
+                                <span class="badge bg-dark text-slate-400 font-mono x-small">TX</span>
+                            </div>
+                            <div class="x-small text-slate-400 mb-1">Window Slots:</div>
+                            <div class="window-strip" id="senderWindowStrip">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unreliable Network Channel -->
+                    <div class="col-6">
+                        <div class="channel-box" id="channelBox">
+                            <div class="channel-track forward" id="forwardTrack">
+                                <span class="track-label" style="left: 10px;">Data Track &rarr;</span>
+                            </div>
+                            <div class="channel-track reverse" id="reverseTrack">
+                                <span class="track-label" style="right: 10px;">&larr; ACK Track</span>
+                            </div>
+                            <div class="position-absolute text-center w-100" style="top: 45%;">
+                                <span class="badge bg-dark-subtle text-slate-500 x-small border border-secondary">
+                                    <i class="bi bi-cloud-slash me-1"></i> Unreliable Channel
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receiver Node -->
+                    <div class="col-3">
+                        <div class="node-box" id="receiverNodeBox">
+                            <div class="d-flex justify-content-between align-items-center border-bottom border-dark-subtle pb-1 mb-2">
+                                <span class="fw-bold text-white small"><i class="bi bi-server text-success me-1"></i> Receiver</span>
+                                <span class="badge bg-dark text-slate-400 font-mono x-small">RX</span>
+                            </div>
+                            <div class="x-small text-slate-400 mb-1">Delivered / Buffer:</div>
+                            <div class="window-strip" id="receiverWindowStrip">
+                                <!-- Generated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Performance Metrics Grid -->
+            <div class="row g-2 mb-4">
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Unique packets delivered successfully to receiver application.">Delivered</div>
+                        <div class="metric-value text-success" id="metricDelivered">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Total packets successfully acknowledged by the sender.">ACKed</div>
+                        <div class="metric-value text-info" id="metricAcked">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="All data packet send attempts, including initial transmissions and all retransmissions.">Attempts</div>
+                        <div class="metric-value" id="metricAttempts">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Data packet send attempts after the initial transmission (attempt > 1).">Retransmissions</div>
+                        <div class="metric-value text-warning" id="metricRetransmissions">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Number of timeout expiration events observed at the sender.">Timeouts</div>
+                        <div class="metric-value text-danger" id="metricTimeouts">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Total data packets dropped by the simulated network layer.">Dropped Data</div>
+                        <div class="metric-value text-danger" id="metricDroppedData">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Total acknowledgement packets dropped by the simulated network layer.">Dropped ACKs</div>
+                        <div class="metric-value text-danger" id="metricDroppedAck">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Total simulated discrete elapsed time from start to completion in milliseconds.">Sim Time</div>
+                        <div class="metric-value text-cyan" id="metricTime">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Unique payload bits delivered successfully divided by simulated elapsed seconds (1024 bytes payload assumption).">Throughput</div>
+                        <div class="metric-value" id="metricThroughput">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Unique packets delivered successfully divided by total packets, multiplied by 100.">Delivery Ratio</div>
+                        <div class="metric-value text-success" id="metricDeliveryRatio">-</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3 col-xl-2">
+                    <div class="metric-card">
+                        <div class="metric-label" data-bs-toggle="tooltip" title="Successful unique payload bits divided by total transmitted data bits, multiplied by 100.">Efficiency</div>
+                        <div class="metric-value text-info" id="metricEfficiency">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Timeline Log & Filters -->
+            <div class="card card-navy p-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <h3 class="h6 fw-bold text-white mb-0">
+                        <i class="bi bi-list-task text-cyan me-1"></i> Discrete Event Timeline
+                    </h3>
+                    <!-- Filter Controls -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <input type="text" class="form-control form-control-sm form-control-navy" id="logFilterText" placeholder="Filter seq or description..." style="width: 180px;">
+                        <select class="form-select form-select-sm form-select-navy" id="logFilterType" style="width: 150px;">
+                            <option value="ALL">All Event Types</option>
+                            <option value="PACKET_SENT">Packet Sent</option>
+                            <option value="PACKET_RECEIVED">Packet Received</option>
+                            <option value="PACKET_DELIVERED">Delivered</option>
+                            <option value="PACKET_DROPPED">Dropped Data</option>
+                            <option value="ACK_SENT">ACK Sent</option>
+                            <option value="ACK_RECEIVED">ACK Received</option>
+                            <option value="TIMEOUT">Timeout</option>
+                            <option value="RETRANSMIT">Retransmission</option>
+                            <option value="WINDOW_ADVANCE">Window Advance</option>
+                        </select>
+                        <div class="form-check form-check-inline m-0">
+                            <input class="form-check-input" type="checkbox" id="logFilterRetxOnly">
+                            <label class="form-check-label x-small text-slate-300" for="logFilterRetxOnly">Retx Only</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="log-scroll-area">
+                    <table class="table table-dark table-dark-custom table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th style="width: 60px;">#</th>
+                                <th style="width: 100px;">Timestamp</th>
+                                <th style="width: 140px;">Event Type</th>
+                                <th style="width: 90px;">Target</th>
+                                <th>Description</th>
+                                <th style="width: 100px;">Attempt</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventLogTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4 small">
+                                    Configure parameters and click <strong>Run Simulation</strong> to generate the event timeline.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="{{ url_for('static', filename='js/simulator.js') }}"></script>
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', () => {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    });
+</script>
+{% endblock %}

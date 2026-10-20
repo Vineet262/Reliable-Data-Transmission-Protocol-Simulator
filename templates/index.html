@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Reliable Data Transmission Protocol Simulator{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 hero-glow">
+    <!-- Hero Header -->
+    <div class="row align-items-center py-4 mb-4">
+        <div class="col-lg-8">
+            <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-cyan-subtle text-cyan mb-3 small fw-semibold border border-cyan">
+                <i class="bi bi-broadcast-pin"></i> Computer Networks PBL Project
+            </div>
+            <h1 class="display-5 fw-bold text-white mb-2 tracking-tight">
+                Reliable Data Transmission <br class="d-none d-md-inline">
+                <span class="text-cyan">Protocol Simulator</span>
+            </h1>
+            <p class="lead text-slate-300 mb-4 fs-6">
+                Explore packet delivery, error recovery, and ARQ protocol performance across unreliable network channels.
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ url_for('simulator_page') }}" class="btn btn-cyan btn-lg px-4 py-2 fs-6 fw-semibold">
+                    <i class="bi bi-play-circle-fill me-2"></i> Start Simulation
+                </a>
+                <a href="{{ url_for('comparison_page') }}" class="btn btn-outline-cyan btn-lg px-4 py-2 fs-6 fw-semibold">
+                    <i class="bi bi-bar-chart-fill me-2"></i> Compare Protocols
+                </a>
+                <a href="{{ url_for('learning_page') }}" class="btn btn-secondary btn-lg px-4 py-2 fs-6 fw-semibold bg-navy-card border-secondary text-slate-300">
+                    <i class="bi bi-book-half me-2"></i> Learn Networking
+                </a>
+            </div>
+        </div>
+        <!-- Architectural Architecture / Sender-Network-Receiver visual -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div class="card card-navy p-3 text-center border-secondary-subtle">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-secondary-subtle text-slate-300 small">Channel Architecture</span>
+                    <span class="text-cyan small font-mono"><i class="bi bi-shield-check me-1"></i>Reliable Service</span>
+                </div>
+                <!-- Architecture Diagram -->
+                <div class="p-3 rounded bg-dark border border-dark-subtle mb-3">
+                    <div class="d-flex align-items-center justify-content-between text-center gap-1">
+                        <div class="p-2 rounded bg-navy-surface border border-primary flex-fill">
+                            <i class="bi bi-laptop text-primary fs-4"></i>
+                            <div class="x-small fw-bold text-white mt-1">Sender</div>
+                            <div class="text-slate-500 x-small font-mono">Buffer / Window</div>
+                        </div>
+                        <div class="px-2 text-slate-400">
+                            <div class="x-small text-cyan font-mono mb-1">Data Pkt &rarr;</div>
+                            <i class="bi bi-arrow-left-right text-slate-500"></i>
+                            <div class="x-small text-purple font-mono mt-1">&larr; ACK Pkt</div>
+                        </div>
+                        <div class="p-2 rounded bg-navy-surface border border-success flex-fill">
+                            <i class="bi bi-server text-success fs-4"></i>
+                            <div class="x-small fw-bold text-white mt-1">Receiver</div>
+                            <div class="text-slate-500 x-small font-mono">In-Order / Delivery</div>
+                        </div>
+                    </div>
+                    <div class="mt-2 pt-2 border-top border-dark-subtle text-start">
+                        <div class="d-flex justify-content-between x-small text-slate-400">
+                            <span><i class="bi bi-lightning text-danger me-1"></i>Unreliable Layer (Drop, Delay)</span>
+                            <span class="badge bg-danger-subtle text-danger">Loss: 0-50%</span>
+                        </div>
+                    </div>
+                </div>
+                <p class="x-small text-slate-400 mb-0">
+                    Discrete-event timeline guarantees deterministic packet transmission with millisecond precision.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Three Protocol Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-12">
+            <h2 class="h4 fw-bold text-white mb-1">Automatic Repeat reQuest (ARQ) Protocols</h2>
+            <p class="text-slate-400 small mb-4">Choose a protocol to launch in the interactive simulation engine.</p>
+        </div>
+
+        <!-- 1. Stop-and-Wait -->
+        <div class="col-md-4">
+            <div class="card card-navy h-100 p-4 d-flex flex-column justify-content-between position-relative">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-primary-subtle text-primary border border-primary px-2 py-1">Window: 1</span>
+                        <span class="font-mono x-small text-slate-400">Seq: 0 / 1</span>
+                    </div>
+                    <h3 class="h5 fw-bold text-white mb-2">Stop-and-Wait ARQ</h3>
+                    <p class="text-slate-300 small leading-relaxed mb-3">
+                        The sender transmits one packet and waits for its acknowledgement before sending another packet.
+                    </p>
+                    <ul class="list-unstyled text-slate-400 x-small mb-4">
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> Simple implementation with minimal memory</li>
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> Receiver accepts only expected sequence</li>
+                        <li class="mb-1"><i class="bi bi-exclamation-triangle text-warning me-1"></i> Low channel utilization over high RTT links</li>
+                    </ul>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('simulator_page') }}?proto=stop_and_wait" class="btn btn-outline-primary fw-semibold btn-sm">
+                        <i class="bi bi-cpu me-1"></i> Simulate Stop-and-Wait
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Go-Back-N -->
+        <div class="col-md-4">
+            <div class="card card-navy h-100 p-4 d-flex flex-column justify-content-between position-relative">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-warning-subtle text-warning border border-warning px-2 py-1">Window: N (Sliding)</span>
+                        <span class="font-mono x-small text-slate-400">Cumulative ACK</span>
+                    </div>
+                    <h3 class="h5 fw-bold text-white mb-2">Go-Back-N ARQ</h3>
+                    <p class="text-slate-300 small leading-relaxed mb-3">
+                        The sender can transmit multiple packets within a sliding window. When a packet is lost, it retransmits the missing packet and subsequent outstanding packets.
+                    </p>
+                    <ul class="list-unstyled text-slate-400 x-small mb-4">
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> High pipeline throughput over high-bandwidth links</li>
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> Receiver requires no out-of-order buffering</li>
+                        <li class="mb-1"><i class="bi bi-exclamation-triangle text-warning me-1"></i> May retransmit correctly received packets</li>
+                    </ul>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('simulator_page') }}?proto=go_back_n" class="btn btn-outline-warning fw-semibold btn-sm">
+                        <i class="bi bi-cpu me-1"></i> Simulate Go-Back-N
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Selective Repeat -->
+        <div class="col-md-4">
+            <div class="card card-navy h-100 p-4 d-flex flex-column justify-content-between position-relative">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="badge bg-success-subtle text-success border border-success px-2 py-1">Window: N (Buffered)</span>
+                        <span class="font-mono x-small text-slate-400">Individual ACK</span>
+                    </div>
+                    <h3 class="h5 fw-bold text-white mb-2">Selective Repeat ARQ</h3>
+                    <p class="text-slate-300 small leading-relaxed mb-3">
+                        The sender retransmits only packets that require retransmission. The receiver can buffer valid out-of-order packets.
+                    </p>
+                    <ul class="list-unstyled text-slate-400 x-small mb-4">
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> Maximum transmission efficiency under loss</li>
+                        <li class="mb-1"><i class="bi bi-check2 text-cyan me-1"></i> Receiver buffers out-of-order frames</li>
+                        <li class="mb-1"><i class="bi bi-info-circle text-info me-1"></i> Requires individual timer per packet</li>
+                    </ul>
+                </div>
+                <div class="d-grid">
+                    <a href="{{ url_for('simulator_page') }}?proto=selective_repeat" class="btn btn-outline-success fw-semibold btn-sm">
+                        <i class="bi bi-cpu me-1"></i> Simulate Selective Repeat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Networking Concepts Overview & Quick Session History -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card card-navy p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 fw-bold text-white mb-0">
+                        <i class="bi bi-mortarboard-fill text-cyan me-2"></i>Core Networking Principles
+                    </h3>
+                    <a href="{{ url_for('learning_page') }}" class="btn btn-outline-cyan btn-sm">Explore All &rarr;</a>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle">
+                            <h4 class="h6 text-cyan fw-bold mb-1">Sliding Windows</h4>
+                            <p class="x-small text-slate-300 mb-0">
+                                Overcomes the stop-and-wait bottleneck by pipelining up to W packets simultaneously without waiting for individual confirmations before advancing.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle">
+                            <h4 class="h6 text-cyan fw-bold mb-1">Cumulative vs Individual ACKs</h4>
+                            <p class="x-small text-slate-300 mb-0">
+                                Cumulative ACKs (Go-Back-N) confirm all packets up to sequence K. Individual ACKs (Selective Repeat) confirm only the isolated packet K.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle">
+                            <h4 class="h6 text-cyan fw-bold mb-1">Timeouts and Round-Trip Delay</h4>
+                            <p class="x-small text-slate-300 mb-0">
+                                If an acknowledgement fails to return within the timeout threshold, retransmission is initiated to guarantee delivery over lossy channels.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 rounded bg-dark border border-dark-subtle">
+                            <h4 class="h6 text-cyan fw-bold mb-1">Throughput &amp; Protocol Efficiency</h4>
+                            <p class="x-small text-slate-300 mb-0">
+                                Throughput measures effective payload bits transferred per second. Efficiency is the ratio of useful payload bits to total transmitted bits.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Runs in Browser Session -->
+        <div class="col-lg-4">
+            <div class="card card-navy p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="h5 fw-bold text-white mb-0">
+                        <i class="bi bi-clock-history text-cyan me-2"></i>Recent Simulations
+                    </h3>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="SimHistory.clear(); renderRecentHistory();">
+                        Clear
+                    </button>
+                </div>
+                <div id="recentHistoryList" class="overflow-auto" style="max-height: 250px;">
+                    <!-- Rendered by app.js / simulator.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

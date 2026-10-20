@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Learn Networking | Reliable Data Transmission{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h1 class="h3 fw-bold text-white mb-1">Computer Networks Learning Center</h1>
+            <p class="text-slate-400 small mb-0">
+                Concepts, ASCII diagrams, protocol walkthroughs, and interactive self-assessment quizzes on ARQ protocols.
+            </p>
+        </div>
+        <div>
+            <input type="text" class="form-control form-control-sm form-control-navy" id="conceptSearch" placeholder="Search concepts..." style="width: 220px;">
+        </div>
+    </div>
+
+    <!-- Navigation Tabs for Learning Modules -->
+    <ul class="nav nav-pills mb-4 gap-2" id="learningTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active px-3 py-2 btn-sm" id="concepts-tab" data-bs-toggle="pill" data-bs-target="#concepts-pane" type="button" role="tab">
+                <i class="bi bi-book me-1"></i> Core Concepts
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 btn-sm" id="walkthroughs-tab" data-bs-toggle="pill" data-bs-target="#walkthroughs-pane" type="button" role="tab">
+                <i class="bi bi-diagram-3 me-1"></i> Protocol Walkthroughs
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 btn-sm" id="comparison-tab" data-bs-toggle="pill" data-bs-target="#comparison-pane" type="button" role="tab">
+                <i class="bi bi-distribute-vertical me-1"></i> Comparative Analysis
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link px-3 py-2 btn-sm" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes-pane" type="button" role="tab">
+                <i class="bi bi-check2-circle me-1"></i> Interactive Quizzes
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="learningTabContent">
+        <!-- 1. CORE CONCEPTS -->
+        <div class="tab-pane fade show active" id="concepts-pane" role="tabpanel">
+            <div class="row g-4">
+                <!-- Concept 1 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-primary-subtle text-primary p-2 rounded"><i class="bi bi-shield-check fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Reliable Data Transmission</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            Underlying physical channels (IP layer) are inherently unreliable: packets may be corrupted, delayed, reordered, or lost. Reliable data transfer guarantees that the data received is exactly what was transmitted, with zero loss, zero corruption, and in exact order.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            Service: rdt_send() &rarr; [Unreliable Net] &rarr; rdt_rcv()
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concept 2 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-cyan-subtle text-cyan p-2 rounded"><i class="bi bi-123 fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Sequence Numbers &amp; Packets</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            Every packet carries a sequence number in its header. This allows the receiver to detect duplicate frames caused by retransmissions and reconstruct out-of-order data in chronological order.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            [ Header: Seq #k | Payload: Data bytes ]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concept 3 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-success-subtle text-success p-2 rounded"><i class="bi bi-patch-check fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Acknowledgements (ACKs)</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            Positive control packets sent back by the receiver informing the sender that data packets have arrived intact. 
+                            <strong>Cumulative ACKs</strong> confirm all packets up to sequence <em>k</em>, while <strong>Individual ACKs</strong> confirm only packet <em>k</em>.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            Receiver &rarr; ACK(k) &rarr; Sender
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concept 4 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-warning-subtle text-warning p-2 rounded"><i class="bi bi-clock-history fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Timeouts &amp; Retransmission</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            If a packet or its corresponding ACK is lost, the sender's countdown timer expires. The sender triggers retransmission of the packet. The timeout must safely exceed the Round-Trip Time (RTT) to prevent premature retransmissions.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            Timeout Threshold &gt; 2 &times; One-Way Propagation Delay
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concept 5 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-info-subtle text-info p-2 rounded"><i class="bi bi-layout-sidebar-inset-reverse fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Sliding Window Concept</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            Allows the sender to transmit up to <em>W</em> packets before requiring an acknowledgement. As acknowledgements arrive, the window slides forward over the sequence space, maintaining high pipeline utilization.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            Window: [base, base + W - 1]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concept 6 -->
+                <div class="col-md-6 col-lg-4 concept-wrapper">
+                    <div class="card card-navy p-3 h-100 concept-card">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-danger-subtle text-danger p-2 rounded"><i class="bi bi-speedometer fs-6"></i></span>
+                            <h2 class="h6 fw-bold text-white mb-0">Performance Metrics</h2>
+                        </div>
+                        <p class="x-small text-slate-300 mb-2 leading-relaxed">
+                            <strong>Throughput:</strong> Unique payload bits delivered per second.<br>
+                            <strong>Delivery Ratio:</strong> (Delivered packets / Total packets) &times; 100%.<br>
+                            <strong>Efficiency:</strong> (Unique delivered bits / Total transmitted bits) &times; 100%.
+                        </p>
+                        <div class="p-2 rounded bg-dark border border-dark-subtle font-mono x-small text-slate-400">
+                            Throughput = (Unique Bits) / Elapsed Seconds
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. PROTOCOL WALKTHROUGHS -->
+        <div class="tab-pane fade" id="walkthroughs-pane" role="tabpanel">
+            <div class="row g-4">
+                <!-- Stop-and-Wait Walkthrough -->
+                <div class="col-lg-4">
+                    <div class="card card-navy p-3 h-100">
+                        <h2 class="h6 fw-bold text-primary mb-2">Stop-and-Wait ARQ Walkthrough</h2>
+                        <pre class="bg-dark p-2 rounded border border-dark-subtle font-mono x-small text-slate-300 mb-3">
+Sender                  Receiver
+  |                        |
+  |--- Packet 0 ---------->| (Accepted)
+  |<-- ACK 0 --------------| (Acked)
+  |                        |
+  |--- Packet 1 ---------->| (DROPPED!)
+  |    [Timer Expires]     |
+  |--- Packet 1 (Retx) --->| (Accepted)
+  |<-- ACK 1 --------------|
+  |                        |
+                        </pre>
+                        <p class="x-small text-slate-300 leading-relaxed mb-0">
+                            <strong>How it works:</strong> The sender transmits packet 0 and starts a timer. When ACK 0 is received, it cancels the timer and sends packet 1. If packet 1 is lost, the sender's timer expires and retransmits packet 1. Simple, but channel capacity remains idle during the entire round-trip delay.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Go-Back-N Walkthrough -->
+                <div class="col-lg-4">
+                    <div class="card card-navy p-3 h-100">
+                        <h2 class="h6 fw-bold text-warning mb-2">Go-Back-N ARQ Walkthrough</h2>
+                        <pre class="bg-dark p-2 rounded border border-dark-subtle font-mono x-small text-slate-300 mb-3">
+Sender (W=4)            Receiver
+  |                        |
+  |--- Packet 0 ---------->| (Accepted)
+  |--- Packet 1 ---------->| (DROPPED!)
+  |--- Packet 2 ---------->| (Discarded: Expected 1)
+  |--- Packet 3 ---------->| (Discarded: Expected 1)
+  |<-- ACK 0 --------------| (Window slides to 1)
+  |    [Timeout for 1]     |
+  |--- Packet 1 (Retx) --->| (Retransmits all
+  |--- Packet 2 (Retx) --->|  outstanding packets
+  |--- Packet 3 (Retx) --->|  1, 2, 3)
+                        </pre>
+                        <p class="x-small text-slate-300 leading-relaxed mb-0">
+                            <strong>How it works:</strong> Sender transmits up to W packets. The receiver accepts packets in strict sequential order. If packet 1 is dropped, subsequent packets (2, 3) are discarded. When the timer for packet 1 expires, the sender goes back and retransmits packets 1, 2, and 3.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Selective Repeat Walkthrough -->
+                <div class="col-lg-4">
+                    <div class="card card-navy p-3 h-100">
+                        <h2 class="h6 fw-bold text-success mb-2">Selective Repeat ARQ Walkthrough</h2>
+                        <pre class="bg-dark p-2 rounded border border-dark-subtle font-mono x-small text-slate-300 mb-3">
+Sender (W=4)            Receiver
+  |                        |
+  |--- Packet 0 ---------->| (Accepted &amp; Delivered)
+  |--- Packet 1 ---------->| (DROPPED!)
+  |--- Packet 2 ---------->| (Buffered in RX buffer)
+  |--- Packet 3 ---------->| (Buffered in RX buffer)
+  |<-- ACK 0 --------------|
+  |<-- ACK 2 --------------| (Marked acked in TX)
+  |<-- ACK 3 --------------| (Marked acked in TX)
+  |    [Timeout for 1]     |
+  |--- Packet 1 (Retx) --->| (Received &amp; Delivers 1,2,3!)
+                        </pre>
+                        <p class="x-small text-slate-300 leading-relaxed mb-0">
+                            <strong>How it works:</strong> Receiver has an out-of-order buffer. Packets 2 and 3 are buffered and acknowledged individually. Only packet 1 times out. The sender retransmits ONLY packet 1. Once packet 1 arrives, packets 1, 2, and 3 are delivered in sequence to the application.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. COMPARATIVE ANALYSIS -->
+        <div class="tab-pane fade" id="comparison-pane" role="tabpanel">
+            <div class="card card-navy p-4">
+                <h2 class="h5 fw-bold text-white mb-3">Detailed Protocol Comparison Matrix</h2>
+                <div class="table-responsive">
+                    <table class="table table-dark table-dark-custom align-middle">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Stop-and-Wait ARQ</th>
+                                <th>Go-Back-N ARQ</th>
+                                <th>Selective Repeat ARQ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="fw-semibold text-white">Sender Window Size</td>
+                                <td class="font-mono text-cyan">1</td>
+                                <td class="font-mono text-cyan">W &gt; 1</td>
+                                <td class="font-mono text-cyan">W &gt; 1</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Receiver Window Size</td>
+                                <td class="font-mono text-cyan">1</td>
+                                <td class="font-mono text-cyan">1</td>
+                                <td class="font-mono text-cyan">W &gt; 1</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Acknowledgement Style</td>
+                                <td>Individual (ACK for current frame)</td>
+                                <td>Cumulative (ACK for highest in-order frame)</td>
+                                <td>Individual (ACK for specific frame)</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Receiver Buffering</td>
+                                <td>No (discards non-matching)</td>
+                                <td>No (discards out-of-order frames)</td>
+                                <td class="text-success fw-semibold">Yes (buffers out-of-order within window)</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Retransmission Scope</td>
+                                <td>Single timed-out frame</td>
+                                <td class="text-warning">All outstanding frames in window</td>
+                                <td class="text-success">Only lost or corrupted frame</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Timer Architecture</td>
+                                <td>Single timer</td>
+                                <td>Single timer for oldest unacked frame</td>
+                                <td>Individual timer per unacked frame</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-semibold text-white">Bandwidth Utilization</td>
+                                <td class="text-danger">Poor over high RTT links</td>
+                                <td class="text-warning">Good; degraded under frequent losses</td>
+                                <td class="text-success">Optimal; resilient to packet losses</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. INTERACTIVE QUIZZES -->
+        <div class="tab-pane fade" id="quizzes-pane" role="tabpanel">
+            <div class="row g-3">
+                <!-- Quiz 1 -->
+                <div class="col-md-6">
+                    <div class="quiz-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary x-small">Question 1</span>
+                            <span class="x-small text-slate-400">Sliding Windows</span>
+                        </div>
+                        <p class="small text-white fw-semibold mb-2">
+                            Why does Stop-and-Wait achieve significantly lower throughput than Go-Back-N over a high-bandwidth-delay product link?
+                        </p>
+                        <button class="btn btn-outline-cyan btn-sm btn-reveal-answer" data-target="ans1">
+                            <i class="bi bi-eye me-1"></i> Reveal Answer
+                        </button>
+                        <div id="ans1" class="quiz-answer">
+                            <p class="x-small text-slate-200 mb-0">
+                                <strong>Answer:</strong> In Stop-and-Wait, the sender must keep the channel completely idle during the Round-Trip Time (RTT) waiting for the ACK of each single packet. In Go-Back-N, the sender pipelines up to <em>W</em> packets back-to-back, filling the transmission pipe and maximizing channel utilization.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz 2 -->
+                <div class="col-md-6">
+                    <div class="quiz-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary x-small">Question 2</span>
+                            <span class="x-small text-slate-400">Acknowledgements</span>
+                        </div>
+                        <p class="small text-white fw-semibold mb-2">
+                            In Go-Back-N, if packets 0, 1, and 2 are sent, and ACK 0 and ACK 1 are lost in the network, but ACK 2 arrives safely, does the sender need to retransmit packets 0 and 1?
+                        </p>
+                        <button class="btn btn-outline-cyan btn-sm btn-reveal-answer" data-target="ans2">
+                            <i class="bi bi-eye me-1"></i> Reveal Answer
+                        </button>
+                        <div id="ans2" class="quiz-answer">
+                            <p class="x-small text-slate-200 mb-0">
+                                <strong>Answer:</strong> No. Because Go-Back-N employs cumulative acknowledgements, ACK 2 implicitly confirms the successful arrival of all packets up to and including sequence 2. The lost ACKs 0 and 1 are harmlessly superseded.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz 3 -->
+                <div class="col-md-6">
+                    <div class="quiz-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary x-small">Question 3</span>
+                            <span class="x-small text-slate-400">Selective Repeat</span>
+                        </div>
+                        <p class="small text-white fw-semibold mb-2">
+                            What is the primary architectural trade-off that makes Selective Repeat more complex to implement than Go-Back-N?
+                        </p>
+                        <button class="btn btn-outline-cyan btn-sm btn-reveal-answer" data-target="ans3">
+                            <i class="bi bi-eye me-1"></i> Reveal Answer
+                        </button>
+                        <div id="ans3" class="quiz-answer">
+                            <p class="x-small text-slate-200 mb-0">
+                                <strong>Answer:</strong> Selective Repeat requires memory buffering at the receiver to store valid out-of-order packets until missing frames arrive, as well as multiple independent hardware/software timers at the sender for each packet in flight.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz 4 -->
+                <div class="col-md-6">
+                    <div class="quiz-card h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-primary-subtle text-primary x-small">Question 4</span>
+                            <span class="x-small text-slate-400">Window Constraints</span>
+                        </div>
+                        <p class="small text-white fw-semibold mb-2">
+                            For a Selective Repeat protocol with sequence numbers of <em>k</em> bits (sequence space $2^k$), what is the maximum allowable window size $W$, and why?
+                        </p>
+                        <button class="btn btn-outline-cyan btn-sm btn-reveal-answer" data-target="ans4">
+                            <i class="bi bi-eye me-1"></i> Reveal Answer
+                        </button>
+                        <div id="ans4" class="quiz-answer">
+                            <p class="x-small text-slate-200 mb-0">
+                                <strong>Answer:</strong> $W \le 2^{k-1}$ (half the sequence space). If $W > 2^{k-1}$, an overlapping receiver window could confuse a retransmitted packet from the previous cycle with a brand new packet from the subsequent sequence cycle upon ACK loss.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="{{ url_for('static', filename='js/learning.js') }}"></script>
+{% endblock %}
